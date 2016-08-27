@@ -20,7 +20,7 @@ int bound_check(GString *g, int start, int end, int length, char *func){
 	
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 	/*In case user enters something past boundaries*/
-	if(start < 0 || end < 0 || start >= length || end > length){
+	if(start < 0 || end < 0 || start >= length || end > length || start > end){
 		fprintf(stderr, "Error: Index out of bounds in function %s\n", func);		
 		return IND_OUT_BOUNDS;
 	}
@@ -553,8 +553,62 @@ GString *set_char(GString *g, char c, int index){
 	return g;
 }
 
-GString *remove_char(GString *g, int index){
+GString *remove_char_at(GString *g, int index){
+
+	if(err_check(g, "remove_char_at") == NULL_PTR)
+		return NULL;
+
 	return delete(g, index, index + 1);
+}
+
+GString *remove_char(GString *g, char c, int occur){
+
+	if(err_check(g, "remove_char") == NULL_PTR)
+		return NULL;
+
+	GStr_Builder *b = (GStr_Builder *) g->internal;
+	
+	if(bound_check(g, occur, occur, b->length, "remove_char") == IND_OUT_BOUNDS)
+		return NULL;
+
+	int track = 0;
+	int i;
+	/*
+		This loop discovers the index of char to remove
+		If string terminates before number of occurences
+		is reached, remove the last occurence of char.
+	*/
+	for(i = 0; i < b->length && track < occur; i++){
+		
+		if(*(b->builder + i) == c)
+			++track;
+	}
+	
+	if(track == occur)
+		return remove_char_at(g, i - 1);
+	else //dont change anything
+		return g;
+}
+
+GString *remove_num_char(GString *g, char c, int num){
+
+	if(err_check(g, "remove_num_char") == NULL_PTR)
+		return NULL;
+
+	GStr_Builder *b = (GStr_Builder *) g->internal;
+
+	if(bound_check(g, num, num, b->length, "remove_num_char") == IND_OUT_BOUNDS)
+		return NULL;
+	int i, j;
+	for(i = 0, j = 0; i <  b->length && j < num; i++){
+
+		if(*(b->builder + i) == c){
+			/*remove_char calls delete, which automatically updates length of string*/
+			remove_char_at(g, i--);
+			++j;
+		}
+	}
+
 }
 
 GString *reverse(GString *g){
@@ -583,6 +637,13 @@ GString *insert(GString *g, char *str, int index){
 		return NULL;
 
 	GStr_Builder *b = (GStr_Builder *) g->internal;
+
+	/*Handle negative indices*/
+	if(index < 0)
+		index += b->length;
+
+	if(bound_check(g, index, index, b->length, "insert") == IND_OUT_BOUNDS)
+		return NULL;		
 
 	if(index >= b->length)
 		return append_str(g, str);

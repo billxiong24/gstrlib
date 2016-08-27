@@ -11,7 +11,6 @@
 	TODO: ( )Write automatic garbage collector??
 		  ( )Write better memory allocator??
 		  (x)Make struct members "private"
-		  ( )Add (real) variable arguments	
 		  (x)Add error handling via enums
 		  (x)Add negative indices to:
 		  	-all access functions except length, find, occur, index_of
@@ -19,7 +18,7 @@
 
 */
 
-typedef enum {NULL_PTR = -3, IND_OUT_BOUNDS = -2, NO_ERROR = 1} EXCEPTION;
+typedef enum {ALLOC_ERR = 4, NULL_PTR = 3, IND_OUT_BOUNDS = 2, NO_ERROR = 0} EXCEPTION;
 
 /*
 	GString.internal points to internal struct that handles
@@ -72,10 +71,11 @@ extern int last_index_from(GString *, char *, int ind);
 /*Return the number of occurences of string*/
 extern int occur(GString *, char *);
 
-/*--------------------MODIFIER FUNCTIONS (6/7)-------------------*/
+/*--------------------MODIFIER FUNCTIONS (7/7)-------------------*/
 
 /*
 	TODO: Fix memory leak in insert function (FIXED)
+		  Optimize remove_num_char function
 */
 
 /*replace string from start to end */
@@ -85,7 +85,14 @@ extern GString * delete(GString *, int start, int end);
 /*replaces character at index*/
 extern GString * set_char(GString *, char, int index);
 /*remove char at index (calls the delete function)*/
-extern GString * remove_char(GString *, int index);
+extern GString * remove_char_at(GString *, int index);
+/*
+	removes the (num)th char from the string
+	(i.e. if num == 5, remove 5th occurrence of char)
+*/
+
+GString *remove_char(GString *, char, int num);
+
 /*removes num occurences of char*/
 extern GString * remove_num_char(GString *, char, int num);
 /*reverse GString * */
