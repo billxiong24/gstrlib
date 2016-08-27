@@ -9,5 +9,6 @@ int main(){
 	puts(toString(g));
 	printf("%d \n", length(g));
 	free_GString(g);
+
 	return 0;
 }
