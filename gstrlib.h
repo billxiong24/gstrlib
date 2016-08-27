@@ -8,7 +8,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 /*
-	TODO: ( )Write automatic garbage collector??
+	TODO: ( )ADD EXIT STATUSES 
+		  ( )Write automatic garbage collector??
 		  ( )Write better memory allocator??
 		  (x)Make struct members "private"
 		  (x)Add error handling via enums
