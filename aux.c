@@ -1,5 +1,5 @@
 #include "aux.h"
-
+#include <stdio.h>
 /*-----------------AUXILLARY/HELPER FUNCTIONS---------------*/
 int len(char *str){
 	char *temp = str;
