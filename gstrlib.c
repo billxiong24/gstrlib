@@ -1,5 +1,6 @@
 #include "gstrlib.h"
 #include "aux.h"
+#include "error.h"
 
 /*
 	Internal struct that GString.internal points to.
@@ -11,18 +12,11 @@ typedef struct{
 	int length;
 }GStr_Builder;
 
-/*
-	This function takes GString *, starting index, ending index,
-	length of string, and function name, and checks bounds. 
-	If invalid, print to stderr and exit with error code IND_OUT_BOUNDS.
-*/
-int bound_check(GString *, int, int, int, const char *);
-EXCEPTION err_check(GString *, const char *func);
+
 
 /*------------------ERROR CHECKING FUNCTIONS-----------------*/
 
 int bound_check(GString *g, int start, int end, int length, const char *func){
-	
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 	/*In case user enters something past boundaries*/
 	if(start < 0 || end < 0 || start >= length || end > length || start > end){
@@ -35,7 +29,6 @@ int bound_check(GString *g, int start, int end, int length, const char *func){
 
 /*Checks for null pointers, exits if found*/
 EXCEPTION err_check(GString *g, const char *func){
-
 	if(!g){
 		fprintf(stderr, "Error: NULL POINTER EXCEPTION in function %s.\n", func);
 		exit(NULL_PTR);
@@ -55,9 +48,7 @@ EXCEPTION err_check(GString *g, const char *func){
 /*--------------------"CONSTRUCTOR"----------------------*/
 
 GString *new_GString(char * str){
-
 	GString *gstring = malloc(sizeof(*gstring));
-
 	gstring->internal = malloc(sizeof(GStr_Builder));
 	/*cast void pointer to private struct*/
 	GStr_Builder *b = (GStr_Builder *) gstring->internal;
@@ -77,12 +68,8 @@ GString *new_GString(char * str){
 /*--------------------APPEND FUNCTIONS-------------------*/
 
 GString *append_str(GString *g, char *str){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-
-	
 	/*reallocate enough memory for the 2 strings*/
 	b->builder = realloc(b->builder, sizeof(char) * (b->length + len(str)) + 1);	
 	/*start from end of the first string and copy*/
@@ -96,30 +83,22 @@ GString *append_str(GString *g, char *str){
 }
 
 GString *append_char(GString *g, char c){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-	
 
 	/*make room for one more char*/
 	b->length++;
 	/*add one byte for null terminator*/
 	b->builder = realloc(b->builder, sizeof(char) * (b->length + 1 + 1));
-	
 	*(b->builder + b->length - 1) = c;
-
 	/*null terminator*/
 	*(b->builder + b->length) = '\0';
 	return g;
 }
 
 GString *append_double(GString *g, double val){
-
 	err_check(g, __func__);
-	
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-
 
 	char hold[12 * 4];
 	sprintf(hold, "%f", val);
@@ -128,21 +107,16 @@ GString *append_double(GString *g, double val){
 	b->builder = realloc(b->builder, sizeof(char) * (b->length + temp + 1));
 	/*copy new string at the end*/
 	copy(b->builder + b->length, hold);
-
 	/*update length*/
 	b->length += temp;
-
 	*(b->builder + b->length) = '\0';
 	return g;
 }
 
 // /*Literally the same thing as append_double*/
 GString *append_float(GString *g, float val){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-	
 	
 	char hold[12 * 4];
 	sprintf(hold, "%f", val);
@@ -150,7 +124,6 @@ GString *append_float(GString *g, float val){
 
 	b->builder = realloc(b->builder, sizeof(char) * (b->length + temp + 1));
 	copy(b->builder + b->length, hold);
-
 	/*update length*/
 	b->length += temp;
 	*(b->builder + b->length) = '\0';
@@ -162,9 +135,7 @@ GString *append_float(GString *g, float val){
 	way to do this...
 */
 GString *append_int(GString *g, int val){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 
 	char hold[12 * 4];
@@ -176,7 +147,6 @@ GString *append_int(GString *g, int val){
 	
 	/*update length*/
 	b->length += temp;
-
 	/*null terminator*/
 	*(b->builder + b->length) = '\0';
 	return g;
@@ -185,11 +155,8 @@ GString *append_int(GString *g, int val){
 /*----------------------ACCESS FUNCTIONS---------------------*/
 
 char get(GString *g, int index){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-
 	if(index < 0)
 		index += b->length;
 
@@ -200,9 +167,7 @@ char get(GString *g, int index){
 }
 
 int length(GString *g){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 
 	return b->length;
@@ -211,7 +176,6 @@ int length(GString *g){
 char *substring(GString *g, int start, int end){
 	/*standard error checking*/
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 
 	/*Handle negative indices like Python*/
@@ -224,7 +188,6 @@ char *substring(GString *g, int start, int end){
 		return "";
 
 	bound_check(g, start, end, b->length, __func__);
-	
 	char *fill = malloc(sizeof(char) * (end - start + 1));
 	int i;
 	/*Fill in temp, excluding the end index*/
@@ -238,7 +201,6 @@ char *substring(GString *g, int start, int end){
 char *reverse_substring(GString *g, int start, int end){
 	/*standard error checking*/
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 
 	/*Handle negative indices like Python*/
@@ -251,7 +213,6 @@ char *reverse_substring(GString *g, int start, int end){
 		return "";
 
 	bound_check(g, start, end, b->length, __func__);
-
 	char *fill = malloc(sizeof(char) * (end - start + 1));
 	int i;
 	/*Fill in temp, excluding the end index*/
@@ -264,15 +225,11 @@ char *reverse_substring(GString *g, int start, int end){
 }
 
 int *find(GString *g, char *str, int n){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 	
-
 	if(len(str) > b->length)
 		return NULL;
-
 
 	int i;
 	int *arr = malloc(sizeof(int) * n);
@@ -299,14 +256,10 @@ int *find(GString *g, char *str, int n){
 }
 
 int index_of(GString *g, char *str){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-
 	if(len(str) > b->length)
 		return -1;
-
 
 	int i;
 	char *src = b->builder;
@@ -327,11 +280,8 @@ int index_of(GString *g, char *str){
 }
 
 int index_from(GString *g, char *str, int index){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-
 	if(index < 0)
 		index += b->length;
 
@@ -339,7 +289,6 @@ int index_from(GString *g, char *str, int index){
 
 	if(len(str) > (b->length-index))
 		return IND_OUT_BOUNDS;
-
 
 	char *src = b->builder;
 	char *dest = str;
@@ -353,14 +302,11 @@ int index_from(GString *g, char *str, int index){
 		/*reset pointer to beginning of string*/
 		dest-=k;
 	}
-
 	return -1;
 }
 
 int last_index_of(GString *g, char *str){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 
 	if(len(str) > b->length)
@@ -389,21 +335,16 @@ int last_index_of(GString *g, char *str){
 }
 
 int last_index_from(GString *g, char *str, int index){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-
 
 	if(index < 0)
 		index += b->length;
 
 	bound_check(g, index, index, b->length, __func__);
-
 	if(len(str) > (b->length - index))
 		return IND_OUT_BOUNDS;
 
-	
 	int dest_len = len(str);
 
 	char *src = b->builder;
@@ -412,7 +353,6 @@ int last_index_from(GString *g, char *str, int index){
 	int i, j, k;
 
 	for(i = index; i >= 0; i--){
-
 		for(j = i, k = dest_len-1;j >= 0 && k >= 0 && src[j] == *dest; *dest--, j--, k--)
 			;
 
@@ -425,15 +365,11 @@ int last_index_from(GString *g, char *str, int index){
 }
 
 int occur(GString *g, char *str){
-	
 	err_check(g, __func__);
-	
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-
 
 	if(len(str) > b->length)
 		return 0;
-
 
 	int i, total = 0;
 
@@ -457,9 +393,7 @@ int occur(GString *g, char *str){
 /*---------------------MODIFIER FUNCTIONS--------------------*/
 
 GString *replace(GString *g, int start, int end, char *str){
-	
 	err_check(g, __func__);
-	
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 
 	if(start < 0)
@@ -487,9 +421,7 @@ GString *replace(GString *g, int start, int end, char *str){
 }
 
 GString *delete(GString *g, int start, int end){
-
 	err_check(g, __func__);
-	
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 
 	if(start < 0)
@@ -504,23 +436,19 @@ GString *delete(GString *g, int start, int end){
 	
 	char *p1 = b->builder + start;
 	char *p2 = b->builder + end;
-
 	int i;
 	/*Length will decrease by end-start characters*/
 	b->length -= (end - start);
 	for(i = start; *p2 ; i++){
 		*p1++ = *p2++;
 	}	
-
 	/*terminate the string*/
 	*p1 = '\0';
 	
 	return g;
 }
 GString *set_char(GString *g, char c, int index){
-
 	err_check(g, __func__);
-	
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 
 	if(index < 0)
@@ -533,33 +461,24 @@ GString *set_char(GString *g, char c, int index){
 }
 
 GString *remove_char_at(GString *g, int index){
-
 	err_check(g, __func__);
-
 	return delete(g, index, index + 1);
 }
 
 GString *remove_char(GString *g, char c, int occur){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-	
 	bound_check(g, occur, occur, b->length, __func__);
 
 	int track = 0;
 	int i;
-	/*
-		This loop discovers the index of char to remove
-		If string terminates before number of occurences
-		is reached, remove the last occurence of char.
-	*/
+
 	for(i = 0; i < b->length && track < occur; i++){
 		
 		if(*(b->builder + i) == c)
 			++track;
 	}
-	
+
 	if(track == occur)
 		return remove_char_at(g, i - 1);
 	else //dont change anything
@@ -567,18 +486,14 @@ GString *remove_char(GString *g, char c, int occur){
 }
 
 GString *remove_num_char(GString *g, char c, int num){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-
 	bound_check(g, num, num, b->length, __func__);
 
 	int i, j;
 	for(i = 0, j = 0; i <  b->length && j < num; i++){
 
 		if(*(b->builder + i) == c){
-			/*remove_char calls delete, which automatically updates length of string*/
 			remove_char_at(g, i--);
 			++j;
 		}
@@ -587,11 +502,8 @@ GString *remove_num_char(GString *g, char c, int num){
 }
 
 GString *reverse(GString *g){
-	
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-
 
 	char *beg = b->builder;
 	char *end = b->builder + b->length-1;
@@ -606,9 +518,7 @@ GString *reverse(GString *g){
 }
 
 GString *insert(GString *g, char *str, int index){
-	
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 
 	/*Handle negative indices*/
@@ -616,7 +526,6 @@ GString *insert(GString *g, char *str, int index){
 		index += b->length;
 
 	bound_check(g, index, index, b->length, __func__);	
-
 	if(index >= b->length)
 		return append_str(g, str);
 
@@ -624,9 +533,7 @@ GString *insert(GString *g, char *str, int index){
 	char *temp = b->builder;
 	/*make space for new string*/
 	b->builder = malloc(sizeof(char) * b->length + l + 1);
-	
 	b->length += l;
-
 	int i, j;
 	
 	/*copy the first half of the old string*/
@@ -650,17 +557,13 @@ GString *insert(GString *g, char *str, int index){
 // /*------------------MISCELLANEOUS FUNCTIONS----------------*/
 
 char *toString(GString *g){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b= (GStr_Builder *) g->internal;
 	return b->builder;
 }
 
 GString *ltrim(GString *g){
-	
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 
 	/*find last occurrence of white space before*/
@@ -672,9 +575,7 @@ GString *ltrim(GString *g){
 	return g;
 }
 GString *rtrim(GString *g){
-	
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
 
 	char *end = b->builder + b->length - 1;
@@ -697,20 +598,25 @@ GString *trim(GString *g){
 	return g;
 }
 void print(GString *g){
-
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
+	printf("%s\nLength: %d\n", b->builder, b->length);
+}
 
-	printf("%s\nLength: %d", b->builder, b->length);
+void for_each(GString *g, void *(*func)(char)){
+	err_check(g, __func__);
+	GStr_Builder *b = (GStr_Builder *) g->internal;
+	char *trav = b->builder;
+
+	while(*trav){
+		func(*trav);
+		*trav++;
+	}
 }
 
 void free_GString(GString *g){
-	
 	err_check(g, __func__);
-
 	GStr_Builder *b = (GStr_Builder *) g->internal;
-
 	free(b->builder);
 	free(b);
 	free(g);

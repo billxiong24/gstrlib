@@ -8,7 +8,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 /*
-	TODO: ( )ADD EXIT STATUSES 
+	TODO: ( ) Write README.txt
+		  (x)Add exit statuses for error checking
 		  ( )Write automatic garbage collector??
 		  ( )Write better memory allocator??
 		  (x)Make struct members "private"
@@ -19,7 +20,7 @@
 
 */
 
-typedef enum {ALLOC_ERR = 4, NULL_PTR = 3, IND_OUT_BOUNDS = 2, NO_ERROR = 0} EXCEPTION;
+typedef enum {NULL_PTR = 3, IND_OUT_BOUNDS = 2, NO_ERROR = 0} EXCEPTION;
 
 /*
 	GString.internal points to internal struct that handles
@@ -30,7 +31,7 @@ typedef struct{
 	void *internal;
 }GString;
 
-/*--------------------"CONSTRUCTOR"-------------------------*/
+/*-----------------------"CONSTRUCTOR"----------------------------*/
 GString *new_GString(char *);
 
 /*--------------------APPEND FUNCTIONS (6/6)----------------------*/
@@ -125,6 +126,8 @@ extern GString * rtrim(GString *);
 extern GString *trim(GString *);
 /*prints contents of GString (string + length)*/
 extern void print(GString *);
+/*for each loop*/
+extern void for_each(GString *, void *(*)(char));
 /*free everything*/
 extern void free_GString(GString *);
 
